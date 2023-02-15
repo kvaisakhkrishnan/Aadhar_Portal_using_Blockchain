@@ -1,4 +1,3 @@
-
 import datetime
 import hashlib
 import json
@@ -11,7 +10,7 @@ from urllib.parse import urlparse
 host = '127.0.0.1'
 port = 5000
 
-# Part 1 - Building a Blockchain
+
 
 class Blockchain:
 
@@ -119,21 +118,15 @@ class Blockchain:
         
     
     
-
-# Part 2 - Mining our Blockchain
-
-# Creating a Web App
 app = Flask(__name__)
 
 
 
-
-# Creating a Blockchain
 blockchain = Blockchain()
 
 
 
-# Getting the full Blockchain
+
 @app.route('/get_chain', methods = ['GET'])
 def get_chain():
     response = {'chain': blockchain.chain,
@@ -152,13 +145,21 @@ def is_valid():
 
 
 
-# Adding a new transaction to the Blockchain
+
 @app.route('/add_data', methods = ['POST'])
 def add_data():
     json = request.get_json()
     data_keys = ['aadhar', 'name', 'age', 'address']
     if not all (key in json for key in data_keys):
         return "Some Elements of Transactions are missing", 400
+    
+
+    for node in blockchain.chain:
+        if node["index"] == 1:
+            continue
+        elif node["data"]["aadhar"] == json["aadhar"]:
+            return jsonify({'message' : 'Data already exists'}), 202
+
     index = blockchain.add_data(json['aadhar'], json['name'], json['age'], json['address'])
 
     previous_block = blockchain.get_previous_block()
@@ -190,48 +191,6 @@ def add_data():
             return jsonify(response), 201
         
         return "Please try again", 400
-
-
-
-
-    
-
-    
-
-
-
-# Part 3 - Decentralizing our Blockchain
-
-
-
-# Connecting new nodes
-@app.route('/connect_node', methods = ['POST'])
-def connect_node():
-    json = request.get_json()
-    nodes = json.get('nodes')
-    if nodes is None:
-        return "No Node", 400
-    for node in nodes:
-        blockchain.add_node(node)
-    response = {'message' : 'All nodes are active. The Blockchain contains the following nodes: ',
-               'total_nodes' : list(blockchain.nodes)}
-    return jsonify(response), 201
-
-
-
-
-
-#Replace chain by longest chain if chain is not updated
-@app.route('/replace_chain', methods = ['GET'])
-def replace_chain():
-    is_chain_replaced = blockchain.replace_chain()
-    if is_chain_replaced:
-        response = {'message': 1,
-                   'new_chain' : blockchain.chain}
-    else:
-        response = {'message': 0,
-                   'actual_chain' : blockchain.chain}
-    return jsonify(response), 200
 
 
 
@@ -273,6 +232,32 @@ def new_aadhar():
 
 
 
+@app.route('/connect_node', methods = ['POST'])
+def connect_node():
+    json = request.get_json()
+    nodes = json.get('nodes')
+    if nodes is None:
+        return "No Node", 400
+    for node in nodes:
+        blockchain.add_node(node)
+    response = {'message' : 'All nodes are active. The Blockchain contains the following nodes: ',
+               'total_nodes' : list(blockchain.nodes)}
+    return jsonify(response), 201
 
-# Running the app
+
+
+@app.route('/replace_chain', methods = ['GET'])
+def replace_chain():
+    is_chain_replaced = blockchain.replace_chain()
+    if is_chain_replaced:
+        response = {'message': 1,
+                   'new_chain' : blockchain.chain}
+    else:
+        response = {'message': 0,
+                   'actual_chain' : blockchain.chain}
+    return jsonify(response), 200
+
+
+
 app.run(host = host, port = port)
+
