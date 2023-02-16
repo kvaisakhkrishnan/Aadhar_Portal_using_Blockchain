@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aadhar Portal</title>
+</head>
+<style>
+    *{
+        margin: 0;
+        padding: 0;
+        
+    }
+    #tab{
+       text-align: right;
+        width: 100%;
+        padding-top : 2%;
+        padding-bottom : 2%;
+        background-color: #001E2B;
+        font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        font-size: large;
+        
+    }
+    #name{
+        padding-top : 2%;
+        padding-bottom : 2%;
+        background-color: navy;
+        
+    }
+    #tab a{
+        text-decoration: none;
+        
+        margin-left:20px;
+        margin-right : 20px;
+        color: whitesmoke;
+        
+        
+    }
+
+
+   
+       
+    
+
+    #login input{
+        font-size: medium;
+        margin-top: 20px;
+        padding-top:5px;
+        padding-bottom: 5px;
+        border-top: none;
+        border-left: none;
+        border-right: none;
+        border-bottom-width: 2px;
+        border-bottom-color: gray;
+        background-color: transparent;
+    }
+
+    #login h1{
+        color: #001E2B;
+        font-weight:bold;
+        font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        font-weight: normal;
+        text-align: center;
+        margin-bottom: 20px;
+
+
+    }
+    #login a{
+        color: #001E2B;
+        font-weight:bold;
+        font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        font-weight: normal;
+        margin-top: 20px;
+        text-decoration: none;
+        
+        
+
+
+    }
+
+    #login{
+
+        display: flex;
+        flex-direction: column;
+        width : 150%;
+        margin-top: 10%;
+        margin-left:60%;
+
+        padding-bottom: 55%;
+        padding-left: 30%;
+        padding-right: 30%;
+        border-radius: 20px;
+       
+    }
+
+    #login button{
+        font-size: medium;
+        margin-top: 50px;
+        padding-top:7px;
+        padding-bottom: 7px;
+        background-color: #001E2B;
+        color: whitesmoke;
+        border-radius: 10px;
+        border: none;
+    }
+
+    #row1{
+        font-family:Arial, sans-serif;
+        margin-left : 20%;
+        font-size: 100px;
+    }
+
+    #row2{
+        font-family:Arial, sans-serif;
+        margin-left : 20%;
+        font-size: 50px;
+    }
+
+  
+
+
+</style>
+<body>
+
+    <div id = "tab">
+
+        
+        <a href = "index.html">Home</a>
+        <a href = "Registration.html">Registration</a>
+        
+      
+    </div>
+    <div style = 'display: flex;' id = "main" >
+
+
+        <div style = "width : 55%">
+            <h1 id = "row1" style = "color: #001E2B">Enroll Now</h1>
+            <h1 id = "row2" style = "color: #e06208">Identify</h1>
+        </div>
+        <div id = "loginback">
+            <div id = "login">
+    
+                <h1>Register</h1>
+                <input type="text" placeholder="First Name" id = "fname">
+                <input type="text" placeholder="Last Name" id = "lname">
+                <input type="number" placeholder="Age" id = "age">
+                <input type="date" placeholder="Date Of Birth" id = "dob">
+                <input type="text" placeholder="Address" id = "address">
+                <input type="text" placeholder="Username" id = "user">
+                <input type="password" placeholder="Password" id = "pass">
+                <button onclick="register()">Submit</button>
+    
+
+            </div>
+        </div>
+    </div>
+
+
+
+</body>
+
+
+<script>
+
+
+
+      
+
+
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+    document.getElementById('main').style.height = h + "px"
+    document.getElementById('row1').style.marginTop = h * 0.25 + 'px'
+    document.getElementById('login').style.marginTop = h * 0.15 + 'px'
+
+
+
+   const register = async () => {
+    
+        var fname = document.getElementById("fname").value
+        var lname = document.getElementById("lname").value
+        var age = document.getElementById("age").value
+        var dob = document.getElementById("dob").value
+        var address = document.getElementById("address").value
+        var user = document.getElementById("user").value
+        var pass = document.getElementById("pass").value
+
+         let options = {
+        method: "POST",
+        headers: {"Content-type": "application/json"},
+        body: JSON.stringify({
+            fname: fname,
+            lname: lname,
+            age: age,
+            dob: dob,
+            address: address,
+            user: user,
+            pass: pass
+        })
+    }
+
+   
+
+        const response = await fetch('http://127.0.0.1:5000/new_aadhar', options);
+        const data = await response.json();
+        if (data["message"] == '1'){
+            alert("Added Succesfully")
+        }
+        else{
+            alert("Try Again")
+        }
+
+        
+ 
+        
+
+        
+    }
+
+
+
+  
+
+
+</script>
+
+</html>

@@ -6,8 +6,11 @@ import requests
 from uuid import uuid4
 from urllib.parse import urlparse
 
+from flask_cors import CORS
 
-host = '127.0.0.1'
+
+
+host = '0.0.0.0'
 port = 5000
 
 
@@ -78,12 +81,16 @@ class Blockchain:
 
     
     
-    def add_data(self, aadhar, name, age, address):
+    def add_data(self, aadhar, fname, lname, age, dob, address, user, passw):
         self.data = {
             'aadhar' : aadhar,
-            'name' : name,
+            'fname' : fname,
+            'lname' : lname,
             'age' : age,
-            'address' : address
+            'dob' : dob,
+            'address' : address,
+            'user' : user,
+            'pass' : passw
         }
         previous_block = self.get_previous_block()
         return previous_block['index'] + 1
@@ -119,6 +126,7 @@ class Blockchain:
     
     
 app = Flask(__name__)
+CORS(app)
 
 
 
@@ -145,13 +153,36 @@ def is_valid():
 
 
 
+@app.route('/search_aadhar', methods = ['POST'])
+def search_aadhar():
+    json = request.get_json()
+    data_keys = ['aadhar']
+    if not all (key in json for key in data_keys):
+        return "Some Elements are missing", 400
+    for block in blockchain.chain:
+        if block["index"] == 1:
+            continue
+        elif block["data"]["aadhar"] == json["aadhar"]:
+            response = {'message': '1',
+                'index': block['index'],
+                'timestamp': block['timestamp'],
+                'proof': block['proof'],
+                'previous_hash': block['previous_hash'],
+               'data' : block['data']}
+            return jsonify(response), 200
+    return jsonify({'message' : '0'}), 200
+    
+            
+    
+    
+
 
 @app.route('/add_data', methods = ['POST'])
 def add_data():
     json = request.get_json()
-    data_keys = ['aadhar', 'name', 'age', 'address']
+    data_keys = ['fname', 'lname', 'age', 'dob', 'address', 'user', 'pass']
     if not all (key in json for key in data_keys):
-        return "Some Elements of Transactions are missing", 400
+        return "Some Elements are missing", 400
     
 
     for node in blockchain.chain:
@@ -160,7 +191,7 @@ def add_data():
         elif node["data"]["aadhar"] == json["aadhar"]:
             return jsonify({'message' : 'Data already exists'}), 202
 
-    index = blockchain.add_data(json['aadhar'], json['name'], json['age'], json['address'])
+    index = blockchain.add_data(aadhar, json['fname'], json['lname'], json['age'], json['dob'], json['address'], json['user'], json['pass'])
 
     previous_block = blockchain.get_previous_block()
     previous_proof = previous_block['proof']
@@ -192,16 +223,31 @@ def add_data():
         
         return "Please try again", 400
 
+@app.route('/user_login', methods = ['POST'])
+def user_login():
+    json = request.get_json()
+    data_keys = ['user', 'pass']
+    if not all (key in json for key in data_keys):
+        return "Some Elements are missing", 400
+    for node in blockchain.chain:
+        if node["index"] == 1:
+            continue
+        elif(node["data"]["user"] == json["user"] and node["data"]["pass"] == json["pass"]):
+            response = node["data"]
+            response["message"] = "1"
+            return jsonify(response), 200
+    response = {"message" : "0"}
+    return jsonify(response), 202
 
 
 @app.route('/new_aadhar', methods = ['POST'])
 def new_aadhar():
     json = request.get_json()
-    data_keys = ['name', 'age', 'address']
+    data_keys = ['fname', 'lname', 'age', 'dob', 'address', 'user', 'pass']
     if not all (key in json for key in data_keys):
-        return "Some Elements of Transactions are missing", 400
+        return "Some Elements are missing", 400
     aadhar = str(uuid4())
-    index = blockchain.add_data(aadhar, json['name'], json['age'], json['address'])
+    index = blockchain.add_data(aadhar, json['fname'], json['lname'], json['age'], json['dob'], json['address'], json['user'], json['pass'])
     previous_block = blockchain.get_previous_block()
     previous_proof = previous_block['proof']
     proof = blockchain.proof_of_work(previous_proof)
@@ -210,7 +256,7 @@ def new_aadhar():
     
     response = requests.get(f'http://{host}:{port}/replace_chain')
     if response.json()['message'] == 0:
-        response = {'message': 'Data Added Succesfully',
+        response = {'message': '1',
                 'index': block['index'],
                 'timestamp': block['timestamp'],
                 'proof': block['proof'],
@@ -220,7 +266,7 @@ def new_aadhar():
     else:
         for node in blockchain.chain:
             if node["data"]["aadhar"] == aadhar:
-                response = {'message': 'Data Added Succesfully',
+                response = {'message': '1',
                 'index': block['index'],
                 'timestamp': block['timestamp'],
                 'proof': block['proof'],
@@ -228,7 +274,7 @@ def new_aadhar():
                'data' : block['data']}
             return jsonify(response), 201
         
-        return "Please try again", 400
+        return jsonify({'message': '0'}), 400
 
 
 
